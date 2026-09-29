@@ -210,7 +210,8 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
 <button type="button" class="btn secondary" onclick="clearReportForm()">Clear Form</button>
 <!-- <button type="button" class="btn secondary" onclick="saveAsPdf()">Save as PDF</button> -->
 <!-- <button type="button" class="btn secondary" onclick="saveAsExcel()">Save as Excel</button> -->
-<button type="button" class="btn green" onclick="openReview()">Generate Word Report</button>
+<button type="button" class="btn secondary" onclick="openSaveReview()">Save to Supabase</button>
+<button type="button" class="btn green" onclick="generateDocumentOnly()">Generate Document</button>
 </div>
 </form>
 </main>
@@ -245,12 +246,12 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
   <div class="review-page">
     <div class="review-top">
       <div class="review-topbar">
-        <div><h2>Review Investigation Report</h2><p>Review all keyed-in information before generating the Word report. Use Edit on any section to return to the form.</p></div>
-        <div class="review-actions"><button type="button" class="btn secondary" onclick="closeReview()">Back to Form</button><button type="button" class="btn green" onclick="submitReviewedReport()">Save &amp; Generate Word Report</button></div>
+        <div><h2>Review Investigation Report</h2><p>Review all keyed-in information before saving or generating the Word document.</p></div>
+        <div class="review-actions"><button type="button" class="btn secondary" onclick="closeReview()">Back to Form</button><button type="button" class="btn secondary" onclick="submitReportToSupabase()">Submit &amp; Save</button><button type="button" class="btn green" onclick="generateDocumentOnly()">Generate Document</button></div>
       </div>
     </div>
     <div id="reviewContent"></div>
-    <div class="review-bottom"><button type="button" class="btn secondary" onclick="closeReview()">Edit Report</button><button type="button" class="btn green" onclick="submitReviewedReport()">Save &amp; Generate Word Report</button></div>
+    <div class="review-bottom"><button type="button" class="btn secondary" onclick="closeReview()">Edit Report</button><button type="button" class="btn secondary" onclick="submitReportToSupabase()">Submit</button><button type="button" class="btn green" onclick="generateDocumentOnly()">Generate Document</button></div>
   </div>
 </div>
 
@@ -414,25 +415,32 @@ function editReviewSection(id){
  section.scrollIntoView({behavior:"smooth",block:"start"});
  const first=section.querySelector("input,textarea,select"); if(first)setTimeout(()=>first.focus(),450);
 }
-async function submitReviewedReport(){
-  closeReview();
+function openSaveReview(){
+  // Step 1: show the review page. No database operation happens here.
+  openReview();
+}
 
-  let reportId = null;
-
-  if(currentReportMode === "edit" && currentReportId){
-    reportId = await updateReport(currentReportId);
-  }else{
-    reportId = await saveReport();
-  }
+async function submitReportToSupabase(){
+  // Step 2: save only after the user reviews and submits.
+  const isEditing = currentReportMode === "edit" && currentReportId;
+  const reportId = isEditing
+    ? await updateReport(currentReportId)
+    : await saveReport();
 
   if(!reportId) return;
-
-  // Word generation remains entirely in the browser.
-  await generateDocx();
 
   currentReportId = reportId;
   currentReportMode = "edit";
   setFormMode("edit");
+
+  closeReview();
+  alert("Report submitted and saved to Supabase successfully.");
+}
+
+async function generateDocumentOnly(){
+  // Word generation is completely independent of Supabase.
+  // This does NOT save or update the report in Supabase.
+  await generateDocx();
 }
 
 
