@@ -254,6 +254,7 @@ button,input,textarea,select{font:inherit}.hidden{display:none!important}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* =========================
    SUPABASE CONFIGURATION
@@ -744,7 +745,6 @@ async function generateDocx(){
  }catch(err){console.error(err);alert("Could not generate the Word document.\n\n"+(err.message||err))}
 }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 checkSession();
 window.__wordLibrariesPromise=(async()=>{const libs=[
